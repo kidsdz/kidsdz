@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Kids DZ | ملابس أطفال</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- CSS خارجي -->
+<link rel="stylesheet" href="assets/css/style.css">
+
+<style>
+:root {
+    --primary:#ff3b3f; --secondary:#fff; --accent:#ffd166;
+}
+*{box-sizing:border-box;font-family:'Cairo',sans-serif;margin:0;padding:0}
+body{background:var(--secondary);color:#333}
+header{position:fixed;top:0;width:100%;background:var(--secondary);box-shadow:0 5px 15px rgba(0,0,0,.1);z-index:1000;padding:15px 0;text-align:center;font-weight:700;font-size:24px;color:var(--primary)}
+.container{width:90%;max-width:1200px;margin:auto;padding:0 10px}
+.hero{padding:160px 10px 80px;text-align:center}
+.hero h1{font-size:32px;color:var(--primary)}
+.hero p{font-size:18px;color:#444;margin-bottom:15px}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;padding:40px 0}
+.product{border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,.1);transition:0.3s;position:relative;}
+.product:hover{transform:translateY(-5px)}
+.carousel{position:relative;width:100%;height:250px;overflow:hidden;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,.1);}
+.carousel img{width:100%;height:250px;object-fit:cover;position:absolute;top:0;left:0;opacity:0;transition:opacity .5s ease-in-out;}
+.carousel img.active{opacity:1}
+.dots{text-align:center;margin-top:5px}
+.dot{height:10px;width:10px;margin:0 4px;background:#bbb;border-radius:50%;display:inline-block;cursor:pointer;transition:0.3s}
+.dot.active{background-color:var(--primary)}
+.info{padding:10px;text-align:center}
+.price{color:var(--primary);font-weight:bold;font-size:18px;margin:5px 0}
+input,select,button{width:100%;padding:10px;margin-top:5px;border-radius:8px;border:1px solid #ddd;font-size:14px}
+input:focus,select:focus,button:focus{outline:2px solid var(--accent)}
+button{background:var(--primary);color:#fff;font-weight:700;cursor:pointer;transition:0.3s}
+button:hover{background:#e32f35}
+.baridi{display:none;background:#fff3f3;border:1px dashed var(--primary);padding:8px;border-radius:8px;margin-top:5px;text-align:center}
+footer{padding:20px 0;text-align:center;background:#f9f9f9;margin-top:20px}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>Kids DZ - ملابس أطفال</header>
+
+<section class="hero">
+<div class="container">
+<h1>ملابس أطفال حسب العمر والألوان</h1>
+<p>الدفع عند الاستلام أو BaridiMob • توصيل سريع لجميع الولايات</p>
+<a href="stats.html">عرض الإحصائيات 📊</a>
+</div>
+</section>
+
+<section class="products">
+<div class="container products-grid" id="products"></div>
+</section>
+
+<footer>
+<div class="container">
+<p>© 2025 Kids DZ – جميع الحقوق محفوظة</p>
+</div>
+</footer>
+
+<!-- JS خارجي -->
+<script src="assets/js/main.js" defer></script>
+
+<script>
+// مثال JS جاهز للعمل، يمكنك ربطه مع Google Sheet وWhatsApp لاحقًا
+const products=[
+    {id:1,name:"ملابس بنات 8-12 سنوات",price:2900,imgs:["https://i.postimg.cc/SNpj6r7W/d437971da6cada48994fc1d80e5d7650.jpg","https://i.postimg.cc/0N3FbStH/dae8efa69255b887c6c6c554dd0004a5.jpg"]},
+    {id:2,name:"ملابس أولاد 6-10 سنوات",price:3200,imgs:["https://i.postimg.cc/NF92x3Yx/30b07ad19be64867458379a15e35d7aa.jpg","https://i.postimg.cc/y86rYjTN/00fa27654526bbf123e22360bff69fbc.jpg"]}
+];
+
+const container=document.getElementById("products");
+products.forEach(p=>{
+container.innerHTML+=`
+<div class="product">
+<div class="carousel" id="carousel${p.id}">
+${p.imgs.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}">`).join('')}
+</div>
+<div class="dots" id="dots${p.id}">
+${p.imgs.map((_,i)=>`<span class="dot" onclick="goSlide(${p.id},${i})"></span>`).join('')}
+</div>
+<div class="info">
+<h3>${p.name}</h3>
+<div class="price">${p.price} دج</div>
+<input id="name${p.id}" placeholder="الاسم الكامل">
+<input id="phone${p.id}" placeholder="رقم الهاتف">
+<select id="pay${p.id}" onchange="showBaridi(${p.id})">
+<option value="">طريقة الدفع</option>
+<option>الدفع عند الاستلام</option>
+<option>BaridiMob</option>
+</select>
+<div class="baridi" id="baridi${p.id}">رقم BaridiMob: <strong>00799999002843906831</strong></div>
+<button onclick="order(${p.id})">اطلب الآن</button>
+</div>
+</div>`});
+
+// وظائف JS
+const carousels={};
+products.forEach(p=>{carousels[p.id]={current:0}; autoSlide(p.id);});
+function showSlide(id,index){const imgs=document.querySelectorAll(`#carousel${id} img`); const dots=document.querySelectorAll(`#dots${id} .dot`); imgs.forEach((img,i)=>img.classList.toggle('active',i===index)); dots.forEach((dot,i)=>dot.classList.toggle('active',i===index)); carousels[id].current=index;}
+function goSlide(id,index){showSlide(id,index);}
+function autoSlide(id){setInterval(()=>{const next=(carousels[id].current+1)%products.find(p=>p.id===id).imgs.length; showSlide(id,next)},3000);}
+function showBaridi(id){const pay=document.getElementById(`pay${id}`).value; document.getElementById(`baridi${id}`).style.display=(pay==="BaridiMob")?"block":"none";}
+function order(id){alert("طلب تجريبي!");}
+</script>
+
+</body>
+</html>
